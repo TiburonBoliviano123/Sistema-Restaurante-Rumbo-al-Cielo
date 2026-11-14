@@ -1,0 +1,26 @@
+# Local credentials and environment
+.env
+.env.*
+!.env.example
+
+# Database exports and backups
+*.sql.gz
+*.dump
+*.bak
+
+# Runtime logs and temporary files
+*.log
+*.tmp
+/vendor/
+/.phpunit.cache/
+/node_modules/
+/playwright-report/
+/test-results/
+
+# User-uploaded menu images (keep upload protection)
+/frontend/assets/uploads/menus/*
+!/frontend/assets/uploads/menus/.htaccess
+!/frontend/assets/uploads/menus/.gitkeep
+
+# Older duplicate copy kept locally
+/Sistema Restaurante F/
