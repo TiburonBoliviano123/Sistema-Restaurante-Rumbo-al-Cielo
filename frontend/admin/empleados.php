@@ -17,6 +17,8 @@ require_once __DIR__ . '/layout.php';
           <tr>
             <th>#</th>
             <th>Nombre</th>
+            <th>CI</th>
+            <th>Departamento</th>
             <th>Código</th>
             <th>Correo</th>
             <th>Celular</th>
@@ -26,7 +28,7 @@ require_once __DIR__ . '/layout.php';
           </tr>
         </thead>
         <tbody id="tbodyEmpleados">
-          <tr><td colspan="8" class="text-center text-muted" style="padding:2rem;">
+          <tr><td colspan="10" class="text-center text-muted" style="padding:2rem;">
             <div class="spinner" style="margin:0 auto .5rem;"></div> Cargando...
           </td></tr>
         </tbody>
@@ -52,32 +54,34 @@ require_once __DIR__ . '/layout.php';
           </div>
           <div class="form-group">
             <label class="form-label">Apellido(s) *</label>
-            <input type="text" name="apellidos" class="form-control" required>
+            <input type="text" name="apellido" class="form-control" required maxlength="100">
           </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Cédula de identidad (CI) *</label>
+            <input type="text" name="ci" class="form-control" required maxlength="20" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Departamento *</label>
+            <input type="text" name="departamento" class="form-control" required maxlength="100" placeholder="Ej: Administración">
+          </div>
+        </div>
+        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Código de Empleado *</label>
             <input type="text" name="codigo_empleado" class="form-control" required placeholder="Ej: EMP-001">
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">CI *</label><input type="text" name="ci" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Departamento *</label><input type="text" name="departamento" class="form-control" required>
-          </div>
-        </div>
-        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Correo electrónico *</label>
-            <input type="email" name="correo" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Celular</label>
-            <input type="text" name="celular" class="form-control" placeholder="+591 7XXXXXXX">
+            <input type="email" name="correo" class="form-control" required maxlength="150">
           </div>
         </div>
         <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Celular</label>
+            <input type="text" name="celular" class="form-control" maxlength="20" placeholder="+591 7XXXXXXX">
+          </div>
           <div class="form-group">
             <label class="form-label">Tipo de Cuenta *</label>
             <select name="tipo_cuenta" class="form-select" required>
@@ -86,6 +90,8 @@ require_once __DIR__ . '/layout.php';
               <option value="NO_PENSIONADO">No Pensionado (18 Bs/almuerzo)</option>
             </select>
           </div>
+        </div>
+        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Contraseña *</label>
             <input type="password" name="contrasena" class="form-control" required minlength="6" placeholder="Mín. 6 caracteres">
@@ -113,35 +119,39 @@ require_once __DIR__ . '/layout.php';
         <input type="hidden" name="id" id="editId">
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Nombre completo *</label>
+            <label class="form-label">Nombre(s) *</label>
             <input type="text" name="nombre" id="editNombre" class="form-control" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Apellido(s) *</label><input type="text" name="apellidos" id="editApellidos" class="form-control" required>
+            <label class="form-label">Apellido(s) *</label>
+            <input type="text" name="apellido" id="editApellido" class="form-control" required maxlength="100">
           </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Cédula de identidad (CI) *</label>
+            <input type="text" name="ci" id="editCi" class="form-control" required maxlength="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Departamento *</label>
+            <input type="text" name="departamento" id="editDepartamento" class="form-control" required maxlength="100">
+          </div>
+        </div>
+        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Código de Empleado *</label>
             <input type="text" name="codigo_empleado" id="editCodigo" class="form-control" required>
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">CI *</label><input type="text" name="ci" id="editCi" class="form-control" required>
-          </div>
-          <div class="form-group"><label class="form-label">Departamento *</label><input type="text" name="departamento" id="editDepartamento" class="form-control" required>
-          </div>
-        </div>
-        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Correo electrónico *</label>
-            <input type="email" name="correo" id="editCorreo" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Celular</label>
-            <input type="text" name="celular" id="editCelular" class="form-control">
+            <input type="email" name="correo" id="editCorreo" class="form-control" required maxlength="150">
           </div>
         </div>
         <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Celular</label>
+            <input type="text" name="celular" id="editCelular" class="form-control" maxlength="20">
+          </div>
           <div class="form-group">
             <label class="form-label">Tipo de Cuenta *</label>
             <select name="tipo_cuenta" id="editTipo" class="form-select" required>
@@ -149,6 +159,8 @@ require_once __DIR__ . '/layout.php';
               <option value="NO_PENSIONADO">No Pensionado</option>
             </select>
           </div>
+        </div>
+        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Nueva Contraseña <span class="text-muted">(opcional)</span></label>
             <input type="password" name="contrasena" class="form-control" minlength="6" placeholder="Dejar vacío para no cambiar">
@@ -194,13 +206,15 @@ async function cargarEmpleados() {
 function renderTabla() {
   const tbody = document.getElementById('tbodyEmpleados');
   if (!empleados.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="padding:2rem;">No hay empleados registrados.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted" style="padding:2rem;">No hay empleados registrados.</td></tr>';
     return;
   }
   tbody.innerHTML = empleados.map((e, i) => `
     <tr>
       <td>${i+1}</td>
-      <td><strong>${escHtml(e.nombre)}</strong></td>
+      <td><strong>${escHtml(e.nombre_completo)}</strong></td>
+      <td>${escHtml(e.ci || '—')}</td>
+      <td>${escHtml(e.departamento || '—')}</td>
       <td><span class="badge badge-muted">${escHtml(e.codigo_empleado || '—')}</span></td>
       <td>${escHtml(e.correo)}</td>
       <td>${escHtml(e.celular || '—')}</td>
@@ -217,7 +231,7 @@ function renderTabla() {
       <td>
         <div style="display:flex;gap:.3rem;">
           <button class="btn btn-secondary btn-sm btn-icon" title="Editar" onclick="abrirEditar(${e.id})">✏️</button>
-          <button class="btn btn-primary btn-sm" title="Familiares" onclick="abrirFamiliares(${e.id},'${escHtml(e.nombre)}')"
+          <button class="btn btn-primary btn-sm" title="Familiares" onclick="abrirFamiliares(${e.id},'${escHtml(e.nombre_completo)}')"
             ${e.tipo_cuenta !== 'PENSIONADO' ? 'style="opacity:.4;cursor:not-allowed;" disabled' : ''}>
             👨‍👩‍👧
           </button>
@@ -242,6 +256,7 @@ async function guardarEmpleado() {
   alertEl.innerHTML = '';
 
   const data = Object.fromEntries(new FormData(form));
+  if (!form.reportValidity()) return;
   data.action = 'registrar';
 
   btnLoading(btn, true);
@@ -263,7 +278,7 @@ function abrirEditar(id) {
   if (!e) return;
   document.getElementById('editId').value      = e.id;
   document.getElementById('editNombre').value  = e.nombre;
-  document.getElementById('editApellidos').value = e.apellidos || '';
+  document.getElementById('editApellido').value = e.apellido || '';
   document.getElementById('editCi').value = e.ci || '';
   document.getElementById('editDepartamento').value = e.departamento || '';
   document.getElementById('editCodigo').value  = e.codigo_empleado || '';
@@ -281,6 +296,7 @@ async function actualizarEmpleado() {
   alertEl.innerHTML = '';
 
   const data = Object.fromEntries(new FormData(form));
+  if (!form.reportValidity()) return;
   data.action = 'actualizar';
 
   btnLoading(btn, true);
@@ -324,7 +340,7 @@ async function cargarFamiliaresModal(titularId) {
   }
   lista.innerHTML = fams.map(f => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid #eef2f7;">
-      <span>${escHtml(f.nombre)} 
+      <span>${escHtml(f.nombre)}
         ${f.estado === 'ACTIVO'
           ? '<span class="badge badge-success" style="margin-left:.4rem;">Activo</span>'
           : '<span class="badge badge-danger" style="margin-left:.4rem;">Inactivo</span>'}

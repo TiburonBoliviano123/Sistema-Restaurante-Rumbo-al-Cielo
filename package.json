@@ -1,0 +1,12 @@
+{
+  "name": "sistema-restaurante-e2e",
+  "private": true,
+  "description": "Pruebas de navegador para el sistema PHP del restaurante UAB",
+  "scripts": {
+    "test:e2e": "node tests/e2e/prepare-db.mjs && playwright test",
+    "test:e2e:headed": "node tests/e2e/prepare-db.mjs && playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}

@@ -1,6 +1,8 @@
 <?php
 $pagina = 'Reporte Mensual — Recursos Humanos';
 require_once __DIR__ . '/layout.php';
+require_once __DIR__ . '/../../backend/models/Configuracion.php';
+$reglas = (new Configuracion())->obtener();
 $anioActual = (int) date('Y');
 $mesActual  = (int) date('m');
 $meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -59,8 +61,8 @@ $meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','
 
     <!-- Leyenda -->
     <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem;font-size:.82rem;">
-      <span><strong>Pensionado/Familiar:</strong> Bs <?= TARIFA_PENSIONADO ?>/almuerzo · Mínimo <?= MINIMO_ALMUERZOS_MES ?> almuerzos/mes</span>
-      <span><strong>No Pensionado:</strong> Bs <?= TARIFA_NO_PENSIONADO ?>/almuerzo · Sin mínimo</span>
+      <span><strong>Pensionado/Familiar:</strong> Bs <?= number_format($reglas['tarifa_pensionado'], 2, '.', '') ?>/almuerzo · Mínimo <?= $reglas['minimo_almuerzos_mes'] ?> almuerzos/mes</span>
+      <span><strong>No Pensionado:</strong> Bs <?= number_format($reglas['tarifa_esporadico'], 2, '.', '') ?>/almuerzo · Sin mínimo</span>
     </div>
 
     <div class="table-responsive">

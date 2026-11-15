@@ -5,90 +5,102 @@ require_once __DIR__ . '/../models/Usuario.php';
 
 class FamiliarController {
     private Familiar $familiarModel;
-    private Usuario  $usuarioModel;
+    private Usuario $usuarioModel;
 
-    public function __construct() {
-        $this->familiarModel = new Familiar();
-        $this->usuarioModel  = new Usuario();
+    public function __construct(?Familiar $familiarModel = null, ?Usuario $usuarioModel = null) {
+        $this->familiarModel = $familiarModel ?? new Familiar();
+        $this->usuarioModel = $usuarioModel ?? new Usuario();
     }
 
-    /**
-     * Registra un familiar para un titular pensionado.
-     * Puede ser invocado por el titular pensionado o por un administrador.
-     * Máximo 3 familiares activos por titular.
-     */
-    public function registrar(int $titularId, string $nombre, string $parentesco, string $ci): array {
+    public function registrar(int $titularId, array $data): array {
         $titular = $this->usuarioModel->findById($titularId);
         if (!$titular) {
             return ['success' => false, 'message' => 'Titular no encontrado.'];
         }
-
         if ($titular['tipo_cuenta'] !== 'PENSIONADO') {
-            return ['success' => false, 'message' => 'Solo los empleados pensionados pueden tener familiares registrados.'];
+            return ['success' => false, 'message' => 'Solo los empleados pensionados pueden registrar familiares.'];
         }
 
-        $nombre = trim($nombre); $ci = trim($ci);
-        $parentesco = strtoupper(trim($parentesco));
-        if (empty($nombre) || empty($ci) || !in_array($parentesco, ['PADRE','MADRE','CONYUGE','HIJO'], true)) {
-            return ['success' => false, 'message' => 'Registra nombre, CI y un parentesco de primer grado (padre, madre, cónyuge o hijo).'];
+        $datos = $this->normalizarYValidar($data);
+        if (isset($datos['error'])) {
+            return ['success' => false, 'message' => $datos['error']];
+        }
+        if ($this->ciDuplicado($datos['ci'])) {
+            return ['success' => false, 'message' => 'El CI ya está asociado a otra persona.'];
+        }
+        try {
+            $id = $this->familiarModel->crear($titularId, $datos['nombre'], $datos['ci'], $datos['parentesco']);
+        } catch (PDOException $exception) {
+            if ($this->esErrorDeUnicidad($exception)) {
+                return ['success' => false, 'message' => 'El CI ya está asociado a otra persona.'];
+            }
+            throw $exception;
         }
 
-        if ($this->familiarModel->ciExiste($ci)) return ['success'=>false,'message'=>'El CI ya está registrado en otro familiar.'];
-
-        $activos = $this->familiarModel->contarActivosPorTitular($titularId);
-        if ($activos >= MAX_FAMILIARES) {
-            return ['success' => false, 'message' => 'Has alcanzado el límite de ' . MAX_FAMILIARES . ' familiares activos.'];
-        }
-
-        $id = $this->familiarModel->crear($titularId, $nombre, $parentesco, $ci);
         return ['success' => true, 'message' => 'Familiar registrado correctamente.', 'familiar_id' => $id];
     }
 
-    /**
-     * Actualiza el nombre de un familiar.
-     */
-    public function actualizar(int $titularId, int $familiarId, string $nombre, string $parentesco, string $ci): array {
+    public function actualizar(int $titularId, int $familiarId, array $data): array {
         $familiar = $this->familiarModel->findById($familiarId);
         if (!$familiar || (int) $familiar['empleado_titular_id'] !== $titularId) {
             return ['success' => false, 'message' => 'Familiar no encontrado o no pertenece a tu cuenta.'];
         }
-
-        $nombre = trim($nombre);
-        if (empty($nombre)) {
-            return ['success' => false, 'message' => 'El nombre es requerido.'];
+        $datos = $this->normalizarYValidar($data);
+        if (isset($datos['error'])) {
+            return ['success' => false, 'message' => $datos['error']];
+        }
+        if ($this->ciDuplicado($datos['ci'], $familiarId)) {
+            return ['success' => false, 'message' => 'El CI ya está asociado a otra persona.'];
         }
 
-        $parentesco = strtoupper(trim($parentesco)); $ci = trim($ci);
-        if (!in_array($parentesco, ['PADRE','MADRE','CONYUGE','HIJO'], true) || $ci === '') return ['success'=>false,'message'=>'Parentesco o CI inválido.'];
-        if ($this->familiarModel->ciExiste($ci,$familiarId)) return ['success'=>false,'message'=>'El CI ya está registrado en otro familiar.'];
-        $this->familiarModel->actualizar($familiarId, $nombre, $parentesco, $ci);
-        return ['success' => true, 'message' => 'Familiar actualizado.'];
+        try {
+            $this->familiarModel->actualizar($familiarId, $datos['nombre'], $datos['ci'], $datos['parentesco']);
+        } catch (PDOException $exception) {
+            if ($this->esErrorDeUnicidad($exception)) {
+                return ['success' => false, 'message' => 'El CI ya está asociado a otra persona.'];
+            }
+            throw $exception;
+        }
+        return ['success' => true, 'message' => 'Familiar actualizado correctamente.'];
     }
 
-    /**
-     * Desactiva un familiar.
-     */
     public function desactivar(int $titularId, int $familiarId): array {
         $familiar = $this->familiarModel->findById($familiarId);
         if (!$familiar || (int) $familiar['empleado_titular_id'] !== $titularId) {
             return ['success' => false, 'message' => 'Familiar no encontrado o no pertenece a tu cuenta.'];
         }
-
         $this->familiarModel->cambiarEstado($familiarId, 'INACTIVO');
         return ['success' => true, 'message' => 'Familiar desactivado correctamente.'];
     }
 
-    /**
-     * Lista todos los familiares de un titular.
-     */
     public function listar(int $titularId): array {
         return $this->familiarModel->listarPorTitular($titularId);
     }
 
-    /**
-     * Registra familiar desde el panel admin.
-     */
-    public function registrarDesdeAdmin(int $titularId, string $nombre, string $parentesco, string $ci): array {
-        return $this->registrar($titularId, $nombre, $parentesco, $ci);
+    private function normalizarYValidar(array $data): array {
+        $nombre = trim((string) ($data['nombre'] ?? ''));
+        $ci = strtoupper((string) preg_replace('/\s+/', '', trim((string) ($data['ci'] ?? ''))));
+        $parentesco = strtoupper(trim((string) ($data['parentesco'] ?? '')));
+
+        if ($nombre === '' || mb_strlen($nombre) > 150) {
+            return ['error' => 'Ingresa el nombre completo del familiar (máximo 150 caracteres).'];
+        }
+        if (strlen($ci) < 3 || strlen($ci) > 20 || !preg_match('/^[A-Z0-9-]+$/', $ci)) {
+            return ['error' => 'El CI debe tener entre 3 y 20 caracteres alfanuméricos.'];
+        }
+        if (!in_array($parentesco, ['PADRE', 'MADRE', 'HIJO', 'HIJA', 'CONYUGE'], true)) {
+            return ['error' => 'Parentesco inválido. Elige padre, madre, hijo, hija o cónyuge.'];
+        }
+        return ['nombre' => $nombre, 'ci' => $ci, 'parentesco' => $parentesco];
+    }
+
+    private function ciDuplicado(string $ci, int $excluirFamiliarId = 0): bool {
+        return $this->familiarModel->ciExiste($ci, $excluirFamiliarId)
+            || $this->usuarioModel->ciExiste($ci);
+    }
+
+    private function esErrorDeUnicidad(PDOException $exception): bool {
+        return $exception->getCode() === '23000'
+            && (int) ($exception->errorInfo[1] ?? 0) === 1062;
     }
 }

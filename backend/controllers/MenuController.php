@@ -7,26 +7,41 @@ class MenuController {
     private Menu      $menuModel;
     private Calendario $calendarioModel;
 
-    public function __construct() {
-        $this->menuModel       = new Menu();
-        $this->calendarioModel = new Calendario();
+    public function __construct(?Menu $menuModel = null, ?Calendario $calendarioModel = null) {
+        $this->menuModel       = $menuModel ?? new Menu();
+        $this->calendarioModel = $calendarioModel ?? new Calendario();
     }
 
     /**
      * Publica o actualiza el menú de una fecha.
      * Solo el administrador puede hacerlo.
      */
-    public function publicar(string $fecha, string $descripcion, int $adminId): array {
-        if (empty(trim($descripcion))) {
-            return ['success' => false, 'message' => 'La descripción del menú no puede estar vacía.'];
+    public function publicar(
+        string $fecha,
+        string $sopa,
+        string $platoPrincipal,
+        string $postre,
+        int $adminId,
+        ?string $imagenPath = null
+    ): array {
+        $platos = array_map('trim', [$sopa, $platoPrincipal, $postre]);
+        if (in_array('', $platos, true)) {
+            return ['success' => false, 'message' => 'Completa la sopa, el plato principal y el postre.'];
+        }
+        if (max(array_map('mb_strlen', $platos)) > 150) {
+            return ['success' => false, 'message' => 'Cada plato debe tener como máximo 150 caracteres.'];
+        }
+
+        $dt = DateTime::createFromFormat('!Y-m-d', $fecha);
+        if (!$dt || $dt->format('Y-m-d') !== $fecha) {
+            return ['success' => false, 'message' => 'La fecha del menú no es válida.'];
         }
 
         if (!$this->calendarioModel->esDiaOperativo($fecha)) {
             return ['success' => false, 'message' => 'Solo se pueden publicar menús para días operativos (Lunes a Jueves, sin feriados).'];
         }
 
-        $dt = DateTime::createFromFormat('Y-m-d', $fecha);
-        $this->menuModel->guardar($fecha, trim($descripcion), $adminId);
+        $this->menuModel->guardar($fecha, $platos[0], $platos[1], $platos[2], $adminId, $imagenPath);
         return ['success' => true, 'message' => 'Menú publicado correctamente para el ' . $dt->format('d/m/Y') . '.'];
     }
 

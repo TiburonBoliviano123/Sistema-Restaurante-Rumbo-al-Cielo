@@ -1,0 +1,16 @@
+{
+    "name": "uab/sistema-restaurante",
+    "description": "Sistema de reservas del restaurante Rumbo al Cielo de la UAB",
+    "type": "project",
+    "require": {
+        "php": ">=8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
+    "scripts": {
+        "test": "@php vendor/bin/phpunit --configuration phpunit.xml",
+        "test:db:setup": "@php tests/setup-test-database.php",
+        "test:integration": "@php -d auto_prepend_file=tests/enable-integration.php vendor/bin/phpunit --configuration phpunit.xml --testsuite integration"
+    }
+}

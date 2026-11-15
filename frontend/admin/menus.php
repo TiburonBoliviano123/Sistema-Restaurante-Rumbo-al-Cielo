@@ -10,7 +10,7 @@ $errorCarga = '';
 try {
     $db    = Database::getConnection();
     $stmt  = $db->prepare(
-        "SELECT m.id, m.fecha, m.sopa, m.plato_principal, m.postre, m.descripcion_menu, m.publicado, u.nombre AS publicado_por
+        "SELECT m.id, m.fecha, m.sopa, m.plato_principal, m.postre, m.descripcion_menu, m.imagen_path, m.publicado, u.nombre AS publicado_por
          FROM menus m
          JOIN usuarios u ON u.id = m.created_by
          ORDER BY m.fecha DESC
@@ -60,7 +60,8 @@ $diasNombre = ['0'=>'Domingo','1'=>'Lunes','2'=>'Martes','3'=>'Miércoles',
             <tr>
               <th>Fecha</th>
               <th>Día</th>
-              <th>Descripción del Menú</th>
+              <th>Platos</th>
+              <th>Foto</th>
               <th>Publicado por</th>
               <th>Acciones</th>
             </tr>
@@ -78,8 +79,21 @@ $diasNombre = ['0'=>'Domingo','1'=>'Lunes','2'=>'Martes','3'=>'Miércoles',
               <tr>
                 <td><strong><?= $fechaCorta ?></strong></td>
                 <td><?= $nombreDia ?></td>
-                <td style="max-width:380px;white-space:pre-wrap;font-size:.82rem;line-height:1.5;">
-                  <?= htmlspecialchars('Sopa: '.($m['sopa'] ?? '').' | Plato principal: '.($m['plato_principal'] ?? '').' | Postre: '.($m['postre'] ?? '')) ?>
+                <td style="min-width:230px;font-size:.82rem;line-height:1.5;">
+                  <?php if ($m['sopa'] !== '' || $m['plato_principal'] !== '' || $m['postre'] !== ''): ?>
+                    <div><strong>Sopa:</strong> <?= htmlspecialchars($m['sopa']) ?></div>
+                    <div><strong>Principal:</strong> <?= htmlspecialchars($m['plato_principal']) ?></div>
+                    <div><strong>Postre:</strong> <?= htmlspecialchars($m['postre']) ?></div>
+                  <?php else: ?>
+                    <?= nl2br(htmlspecialchars($m['descripcion_menu'])) ?>
+                  <?php endif; ?>
+                </td>
+                <td>
+                  <?php if (!empty($m['imagen_path'])): ?>
+                    <img src="<?= $base ?>/<?= htmlspecialchars($m['imagen_path']) ?>" alt="Foto del menú" loading="lazy" style="width:76px;height:56px;object-fit:cover;border-radius:8px;">
+                  <?php else: ?>
+                    <span class="text-muted" style="font-size:.75rem;">Sin foto</span>
+                  <?php endif; ?>
                 </td>
                 <td style="font-size:.83rem;"><?= htmlspecialchars($m['publicado_por']) ?></td>
                 <td>

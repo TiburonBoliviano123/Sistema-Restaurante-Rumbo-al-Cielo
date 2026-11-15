@@ -30,10 +30,6 @@ class CalendarioController {
         }
 
         $this->calendarioModel->guardar($fecha, true, $descripcion);
-        // Un feriado suspende las reservas ya programadas para evitar descuentos.
-        $db = Database::getConnection();
-        $cancelar = $db->prepare("UPDATE reservas SET estado='CANCELADO', fecha_cancelacion=NOW() WHERE fecha_reserva=? AND estado IN ('RESERVADO','INASISTENCIA')");
-        $cancelar->execute([$fecha]);
         return [
             'success' => true,
             'message' => 'Día ' . $dt->format('d/m/Y') . ' marcado como feriado.',
